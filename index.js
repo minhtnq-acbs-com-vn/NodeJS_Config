@@ -8,7 +8,7 @@ const client = ConnectBroker();
 
 client.on("connect", () => OnConnected(client));
 
-client.on("message", (topic, message) => OnMessage(topic, message));
+client.on("message", (topic, message) => OnMessage(client, topic, message));
 
 client.on("error", err => console.log(err));
 

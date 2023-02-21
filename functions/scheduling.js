@@ -1,4 +1,6 @@
 import cron from "node-cron";
+import { client } from "./callbacks.js";
+import { getRoomYolo } from "./api.js";
 
 let cronList = [];
 
@@ -27,7 +29,10 @@ const CreateConfigCron = configArr => {
     let roomName = configArr[i].room;
     let loopTime = configArr[i].loopTime;
     let index = i;
-    index = CreateCronTask(GetCronExpress("config", loopTime));
+    index = CreateCronTask(
+      GetCronExpress("config", loopTime),
+      ConfigMQTT(roomName)
+    );
     cronList.push(index);
   }
 };
@@ -42,4 +47,9 @@ const CreateCronTask = (expression, func) => {
   return cron.schedule(expression, func, { timezone: "Asia/Ho_Chi_Minh" });
 };
 
-const ConfigMQTT = roomName => {};
+const ConfigMQTT = async roomName => {
+  let yoloInfo = await getRoomYolo(roomName);
+  let request = yoloInfo.request;
+  let topic = yoloInfo.subscribe;
+  client.publish(topic, request);
+};

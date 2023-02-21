@@ -2,11 +2,12 @@ import { mqtt, brokerConfig } from "../config/init.js";
 
 import { RequestHandler, SubscribeToTopics } from "./eventHandler.js";
 
-const ConnectBroker = () => mqtt.connect(brokerConfig);
+let client = mqtt.connect(brokerConfig);
 
-const OnConnected = client => SubscribeToTopics(client);
+client.on("connect", SubscribeToTopics());
 
-const OnMessage = (client, topic, message) =>
-  RequestHandler(client, topic, message.toString());
+client.on("message", (topic, message) =>
+  RequestHandler(topic, message.toString())
+);
 
-export { ConnectBroker, OnConnected, OnMessage };
+export { client };

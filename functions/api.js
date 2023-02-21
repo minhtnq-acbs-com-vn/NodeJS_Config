@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const requestConfig = "https://perfect-cow-14.telebit.io/api/v1/config";
-const requestYolo = "https://perfect-cow-14.telebit.io/api/v1/yolov5";
+const requestYolo = "https://perfect-cow-14.telebit.io/api/v1/yolov5/";
 
 const getAllConfig = async () => {
   let result = await axios.get(requestConfig);
@@ -12,15 +12,14 @@ const getAllConfig = async () => {
   return newArr;
 };
 
-const getAllYolo = async () => {
-  let result = await axios.get(requestYolo);
+const getRoomYolo = async roomName => {
+  let result = await axios.get(requestYolo + roomName);
   let newArr = result.data.map(obj => ({
     subscribe: obj.subscribe,
     publish: obj.publish,
-    room: obj.room,
     request: obj.request[0],
   }));
-  return newArr;
+  return newArr[0];
 };
 
-export { getAllConfig, getAllYolo };
+export { getAllConfig, getRoomYolo };

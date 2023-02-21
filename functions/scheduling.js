@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { client } from "./callbacks.js";
-import { getRoomYolo } from "./api.js";
+import { getRoomYolo, getRoomDevice } from "./api.js";
+import { messArr } from "./eventHandler.js";
 
 let cronList = [];
 
@@ -52,4 +53,26 @@ const ConfigMQTT = async roomName => {
   let request = yoloInfo.request;
   let topic = yoloInfo.subscribe;
   client.publish(topic, request);
+  //wait for yolo response
 };
+
+const GetYoloResponse = async message => {
+  if ("1" in messArr) {
+    let roomNeedToCheck = message.room;
+    GetDeviceResponse(roomNeedToCheck);
+  }
+};
+
+const GetDeviceResponse = async roomName => {
+  let deviceObj = await getRoomDevice(roomName);
+  // Get device subscribe topic
+  for (let i = 0; i < deviceObj.length; i++) {
+    deviceRequestPacket = deviceObj[i].request;
+    client.publish(deviceObj[i].subscribe, deviceRequestPacket);
+  }
+  // wait for device reponse
+  // if response have a module that is unlocked or not turn off -> push noti
+  // if ("0 || unlocked") push noti about that module to user
+};
+
+const PushNoti = () => {};

@@ -1,45 +1,33 @@
 import cron from "node-cron";
-import { client } from "./callbacks.js";
-import { getRoomYolo, getRoomDevice } from "./api.js";
-import { messArr } from "./eventHandler.js";
+import { client } from "../index.js";
+import { getRoomYolo, getRoomDevice, getRoomConfig } from "./api.js";
 
-let cronList = [];
+let cronList = [{}];
 
-const action1 = () => {
-  console.log("run 2 every second");
+const RemoveCronFromList = roomName => {
+  let obj = cronList.find(o => o.roomName === roomName);
+  console.log("🚀 ~ file: scheduling.js:10 ~ RemoveCronFromList ~ obj:", obj);
+  if (obj !== undefined) {
+    obj.stop();
+  }
 };
 
-const job1 = cron.schedule("*/2 * * * * *", action1, {
-  timezone: "Asia/Ho_Chi_Minh",
-});
+const CreateCron = async roomName => {
+  RemoveCronFromList(roomName);
+  let roomConfig = await getRoomConfig(roomName);
+  let loopTime = roomConfig.loopTime;
 
-const action2 = () => {
-  console.log("run every second");
-};
-
-const job2 = cron.schedule("* * * * * *", action2, {
-  timezone: "Asia/Ho_Chi_Minh",
-});
-
-const CreateConfigCron = configArr => {
-  if (cronList.length > 0) {
-    for (let i = 0; i < cronList.length; i++) cronList[i].stop();
-    cronList = [];
-  }
-  for (let i = 0; i < configArr.length; i++) {
-    let roomName = configArr[i].room;
-    let loopTime = configArr[i].loopTime;
-    let index = i;
-    index = CreateCronTask(
-      GetCronExpress("config", loopTime),
-      ConfigMQTT(roomName)
-    );
-    cronList.push(index);
-  }
+  cronJob = CreateCronTask(
+    GetCronExpress("config", loopTime),
+    ConfigMQTT(roomName)
+  );
+  cronList.push({ roomName: cronJob });
 };
 
 const GetCronExpress = (type, time) => {
-  if (type === "config" && time.search(":") === -1) return `* */${time} * * *`;
+  if (type === "config" && time.search(":") === -1)
+    if (time === "1") return `* */ * * *`;
+    else return `* */${time} * * *`;
   if (type === "schedule") {
   }
 };
@@ -50,29 +38,42 @@ const CreateCronTask = (expression, func) => {
 
 const ConfigMQTT = async roomName => {
   let yoloInfo = await getRoomYolo(roomName);
-  let request = yoloInfo.request;
+  let request = yoloInfo.request[0];
   let topic = yoloInfo.subscribe;
   client.publish(topic, request);
-  //wait for yolo response
+  console.log("🚀 ~ file: scheduling.js:42 ~ ConfigMQTT ~ request:", request);
 };
 
-const GetYoloResponse = async message => {
-  if ("1" in messArr) {
-    let roomNeedToCheck = message.room;
-    GetDeviceResponse(roomNeedToCheck);
-  }
+const GetYoloResponse = async (roomName, message) => {
+  console.log(`This topic ${roomName} has a message ${message}`);
+  if (message === "0") return;
+  roomName = roomName.slice(roomName.indexOf("/") + 1);
+  GetDeviceResponse(roomName);
 };
 
 const GetDeviceResponse = async roomName => {
-  let deviceObj = await getRoomDevice(roomName);
-  // Get device subscribe topic
-  for (let i = 0; i < deviceObj.length; i++) {
-    deviceRequestPacket = deviceObj[i].request;
-    client.publish(deviceObj[i].subscribe, deviceRequestPacket);
+  let deviceArr = await getRoomDevice(roomName);
+
+  let requiredTopicPackets = [];
+
+  for (let i = 0; i < deviceArr.length; i++) {
+    if (deviceArr[i].deviceModule === "Door") {
+      let topic = deviceArr[i].subscribe;
+      requiredTopicPackets.push({ topic: deviceArr[i].request.Door });
+    }
+    if (deviceArr[i].deviceModule === "CameraPack") {
+      requiredTopicPackets.push({ topic: deviceArr[i].request.Temp });
+      requiredTopicPackets.push({ topic: deviceArr[i].request.LightState });
+    }
   }
-  // wait for device reponse
-  // if response have a module that is unlocked or not turn off -> push noti
-  // if ("0 || unlocked") push noti about that module to user
+
+  console.log(
+    "🚀 ~ file: scheduling.js:58 ~ GetDeviceResponse ~ requiredTopicPackets:",
+    requiredTopicPackets
+  );
+  //   client.publish(deviceObj[i].subscribe, deviceRequestPacket.door);
 };
 
 const PushNoti = () => {};
+
+export { CreateCron, GetYoloResponse };

@@ -1,30 +1,46 @@
-import { client } from "./callbacks.js";
+import { client } from "../index.js";
 import { subTopic } from "../config/init.js";
-import { getAllConfig, getAllYolo } from "./api.js";
+import { CreateCron, GetYoloResponse } from "./scheduling.js";
+import { getAllYolo } from "./api.js";
 
-let messArr = [];
+let yolosTopic = [];
+let devicesTopic = [];
+
+const SubscribeToYolos = async () => {
+  let yoloArr = await getAllYolo();
+  for (let i = 0; i < yoloArr.length; i++) {
+    client.subscribe(yoloArr[i]);
+  }
+  yolosTopic = yoloArr;
+};
+
+const SubscribeToDevices = async () => {
+  let yoloArr = await getAllYolo();
+  for (let i = 0; i < yoloArr.length; i++) {
+    client.subscribe(yoloArr[i]);
+  }
+  yolosTopic = yoloArr;
+};
 
 const SubscribeToTopics = () => {
-  console.log("subscribe to", subTopic);
   client.subscribe(subTopic);
+  SubscribeToYolos();
+  console.log("Wait for messages");
 };
 
 const RequestHandler = (topic, message) => {
-  let requiredTopics = getAllYolo();
-  if (topic in requiredTopics) {
-    messArr.push(message);
-    // wait for more packets - based on time should be easier but ideally would be based on the length of requiredTopics since it represents the amout of yolo instances
+  console.log("🚀 ~ file: eventHandler.js:32 ~ RequestHandler ~ topic:", topic)
+  if (yolosTopic.includes(topic) === true) {
+    GetYoloResponse(topic, message);
   }
-  if (topic !== subTopic) return;
-  if (message === "config") ConfigHandler();
-  if (message === "schedule") ScheduleHandler();
-};
-
-const ConfigHandler = async () => {
-  let configs = await getAllConfig();
-  console.log("", configs);
+  if (message.startsWith("config") && message.search(":") !== -1) {
+    CreateCron(message.slice(message.indexOf(":") + 1));
+  }
+  if (message === "schedule") {
+    ScheduleHandler();
+  }
 };
 
 const ScheduleHandler = async () => {};
 
-export { messArr, SubscribeToTopics, RequestHandler };
+export { SubscribeToTopics, RequestHandler };

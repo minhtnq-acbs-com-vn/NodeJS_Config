@@ -1,21 +1,10 @@
-import {
-  ConnectBroker,
-  OnConnected,
-  OnMessage,
-} from "./functions/callbacks.js";
+import { mqtt, brokerConfig } from "./config/init.js";
 
-const client = ConnectBroker();
+import { RequestHandler, SubscribeToTopics } from "./functions/eventHandler.js";
 
-client.on("connect", () => OnConnected(client));
+let client = mqtt.connect(brokerConfig);
 
-client.on("message", (topic, message) => OnMessage(client, topic, message));
+client.on("connect", () => SubscribeToTopics());
+client.on("message", (topic, message) => RequestHandler(topic, message.toString()));
 
-client.on("error", err => console.log(err));
-
-client.on("reconnect", () => console.log("Reconnecting..."));
-
-client.on("close", () => console.log("Disconnected"));
-
-client.on("disconnect", log => console.log(log));
-
-client.on("offline", () => console.log("Offline"));
+export { client };

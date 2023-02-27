@@ -1,7 +1,11 @@
 import { client } from "../index.js";
 import { subTopic } from "../config/init.js";
-import { CreateCron, GetYoloResponse } from "./scheduling.js";
-import { getAllYolo } from "./api.js";
+import {
+  CreateCron,
+  GetDeviceResponse,
+  GetYoloResponse,
+} from "./scheduling.js";
+import { getAllRoomDevices, getAllYolo } from "./api.js";
 
 let yolosTopic = [];
 let devicesTopic = [];
@@ -15,21 +19,25 @@ const SubscribeToYolos = async () => {
 };
 
 const SubscribeToDevices = async () => {
-  let yoloArr = await getAllYolo();
-  for (let i = 0; i < yoloArr.length; i++) {
-    client.subscribe(yoloArr[i]);
+  let devicesArr = await getAllRoomDevices();
+  for (let i = 0; i < devicesArr.length; i++) {
+    client.subscribe(devicesArr[i]);
   }
-  yolosTopic = yoloArr;
+  devicesTopic = devicesArr;
 };
 
-const SubscribeToTopics = () => {
+const SubscribeToTopics = async () => {
   client.subscribe(subTopic);
-  SubscribeToYolos();
+  await SubscribeToYolos();
+  await SubscribeToDevices();
   console.log("Wait for messages");
 };
 
 const RequestHandler = (topic, message) => {
-  console.log("🚀 ~ file: eventHandler.js:32 ~ RequestHandler ~ topic:", topic)
+  console.log("", topic, message);
+  if (devicesTopic.includes(topic) === true) {
+    GetDeviceResponse(topic, message);
+  }
   if (yolosTopic.includes(topic) === true) {
     GetYoloResponse(topic, message);
   }
@@ -37,10 +45,7 @@ const RequestHandler = (topic, message) => {
     CreateCron(message.slice(message.indexOf(":") + 1));
   }
   if (message === "schedule") {
-    ScheduleHandler();
   }
 };
-
-const ScheduleHandler = async () => {};
 
 export { SubscribeToTopics, RequestHandler };

@@ -6,6 +6,7 @@ const requestAllYolo = "https://perfect-cow-14.telebit.io/api/v1/yolov5";
 const requestRoomDevice =
   "https://perfect-cow-14.telebit.io/api/v1/room/device/";
 const requestRoomConfig = "https://perfect-cow-14.telebit.io/api/v1/config/";
+const requestGetAllRoom = "https://perfect-cow-14.telebit.io/api/v1/room";
 
 const getAllConfig = async roomName => {
   let result = await axios.get(requestConfig + roomName);
@@ -56,4 +57,30 @@ const getRoomConfig = async roomName => {
   return result.data;
 };
 
-export { getAllConfig, getAllYolo, getRoomYolo, getRoomDevice, getRoomConfig };
+const getAllRoomDevices = async () => {
+  let result = await axios.get(requestGetAllRoom);
+  let roomList = result.data.uniqueRoom;
+  let filtered = [];
+
+  for (let i = 0; i < roomList.length; i++) {
+    filtered.push(await getRoomDevice(roomList[i]));
+  }
+
+  let newArr = [];
+  for (let i = 0; i < filtered.length; i++) {
+    for (let j = 0; j < filtered[i].length; j++) {
+      newArr.push(filtered[i][j].publish);
+    }
+  }
+  return newArr;
+  // return filtered;
+};
+
+export {
+  getAllConfig,
+  getAllYolo,
+  getRoomYolo,
+  getRoomDevice,
+  getRoomConfig,
+  getAllRoomDevices,
+};

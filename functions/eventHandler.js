@@ -1,30 +1,14 @@
 import { client } from "../index.js";
 import { subTopic } from "../config/init.js";
+import { CreateCron } from "./scheduling.js";
 import {
-  CreateCron,
+  devicesTopic,
+  yolosTopic,
+  SubscribeToYolos,
+  SubscribeToDevices,
   GetDeviceResponse,
   GetYoloResponse,
-} from "./scheduling.js";
-import { getAllRoomDevices, getAllYolo } from "./api.js";
-
-let yolosTopic = [];
-let devicesTopic = [];
-
-const SubscribeToYolos = async () => {
-  let yoloArr = await getAllYolo();
-  for (let i = 0; i < yoloArr.length; i++) {
-    client.subscribe(yoloArr[i]);
-  }
-  yolosTopic = yoloArr;
-};
-
-const SubscribeToDevices = async () => {
-  let devicesArr = await getAllRoomDevices();
-  for (let i = 0; i < devicesArr.length; i++) {
-    client.subscribe(devicesArr[i]);
-  }
-  devicesTopic = devicesArr;
-};
+} from "./mqtt.js";
 
 const SubscribeToTopics = async () => {
   client.subscribe(subTopic);

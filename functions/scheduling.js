@@ -1,25 +1,17 @@
 import cron from "node-cron";
-import { client } from "../index.js";
-import { getRoomYolo, getRoomDevice, getRoomConfig } from "./api.js";
 
-let cronList = {};
+import { getRoomConfig } from "./api.js";
+import { ConfigMQTT } from "./mqtt.js";
 
-const RemoveCronFromList = roomName => {
-  let obj = cronList[roomName];
-  if (obj !== undefined) {
-    console.log("Remove this object", obj);
-    obj.stop();
-  }
-};
+let configCronList = {};
+let scheduleCronList = {};
 
-const CreateCron = async roomName => {
-  RemoveCronFromList(roomName);
-  let roomConfig = await getRoomConfig(roomName);
-  let loopTime = roomConfig.loopTime;
+const RemoveCronFromList = (type, roomName) => {
+  if (type === "config" && configCronList[roomName] !== undefined)
+    configCronList[roomName].stop();
 
-  let cronJob = CreateCronTask("config", loopTime, roomName);
-  cronList[roomName] = cronJob;
-  console.log("🚀 ~ file: scheduling.js:26 ~ CreateCron ~ cronList:", cronList);
+  if (type === "schedule" && scheduleCronList[roomName] !== undefined)
+    scheduleCronList[roomName].stop();
 };
 
 const GetCronExpress = (type, time) => {
@@ -37,40 +29,16 @@ const CreateCronTask = (type, loopTime, roomName) => {
   });
 };
 
-const ConfigMQTT = async roomName => {
-  let yoloInfo = await getRoomYolo(roomName);
-  client.publish(yoloInfo.subscribe, yoloInfo.request);
-};
-
-const GetYoloResponse = (roomName, message) => {
-  console.log(`This topic ${roomName} has a message ${message}`);
-  if (message === "0") return;
-  roomName = roomName.slice(roomName.indexOf("/") + 1);
-  SentDeviceRequest(roomName);
-};
-
-const SentDeviceRequest = async roomName => {
-  let deviceArr = await getRoomDevice(roomName);
-
-  for (let i = 0; i < deviceArr.length; i++) {
-    console.log(deviceArr[i].subscribe);
-    if (deviceArr[i].deviceModule === "Door") {
-      client.publish(deviceArr[i].subscribe, deviceArr[i].request.door);
-    }
-
-    if (deviceArr[i].deviceModule === "CameraPack") {
-      client.publish(deviceArr[i].subscribe, deviceArr[i].request.lightState);
-      client.publish(deviceArr[i].subscribe, deviceArr[i].request.temp);
-    }
+const CreateCron = async (type, roomName) => {
+  RemoveCronFromList(type, roomName);
+  if (type === "config") {
+    let roomConfig = await getRoomConfig(roomName);
+    let loopTime = roomConfig.loopTime;
+    let cronJob = CreateCronTask(type, loopTime, roomName);
+    configCronList[roomName] = cronJob;
+  }
+  if (type === "schedule") {
   }
 };
 
-const GetDeviceResponse = (roomName, message) => {
-  console.log(`This topic ${roomName} has a message ${message}`);
-  if (message === "0") return;
-  PushNoti(roomName);
-};
-
-const PushNoti = roomName => {};
-
-export { CreateCron, GetYoloResponse, GetDeviceResponse };
+export { CreateCron };

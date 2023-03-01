@@ -1,12 +1,14 @@
 import axios from "axios";
 
-const requestConfig = "https://perfect-cow-14.telebit.io/api/v1/config/";
-const requestYolo = "https://perfect-cow-14.telebit.io/api/v1/yolov5/";
-const requestAllYolo = "https://perfect-cow-14.telebit.io/api/v1/yolov5";
-const requestRoomDevice =
-  "https://perfect-cow-14.telebit.io/api/v1/room/device/";
-const requestRoomConfig = "https://perfect-cow-14.telebit.io/api/v1/config/";
-const requestGetAllRoom = "https://perfect-cow-14.telebit.io/api/v1/room";
+import {
+  requestConfig,
+  requestYolo,
+  requestAllYolo,
+  requestRoomDevice,
+  requestRoomConfig,
+  requestGetAllRoom,
+  requestSchedule,
+} from "../config/apiUrl.js";
 
 const getAllConfig = async roomName => {
   let result = await axios.get(requestConfig + roomName);
@@ -73,7 +75,10 @@ const getAllRoomDevices = async () => {
     }
   }
   return newArr;
-  // return filtered;
+};
+
+const getSchedule = async (roomName, deviceModule) => {
+  let result = await axios.get(requestSchedule + roomName + ":" + deviceModule);
 };
 
 export {

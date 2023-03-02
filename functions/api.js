@@ -47,11 +47,8 @@ const getRoomDevice = async roomName => {
     request: obj.request,
     ack: obj.ack,
   }));
-  let filtered = newArr.filter(el => {
-    return el.deviceModule != "AC";
-  });
 
-  return filtered;
+  return newArr;
 };
 
 const getRoomConfig = async roomName => {
@@ -77,8 +74,9 @@ const getAllRoomDevices = async () => {
   return newArr;
 };
 
-const getSchedule = async (roomName, deviceModule) => {
-  let result = await axios.get(requestSchedule + roomName + ":" + deviceModule);
+const getSchedule = async id => {
+  let result = await axios.get(requestSchedule + id);
+  return result.data[0];
 };
 
 export {
@@ -88,4 +86,5 @@ export {
   getRoomDevice,
   getRoomConfig,
   getAllRoomDevices,
+  getSchedule,
 };

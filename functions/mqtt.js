@@ -25,7 +25,7 @@ const SubscribeToDevices = async () => {
   devicesTopic = devicesArr;
 };
 
-const ConfigMQTT = async roomName => {
+const SetupMQTTConfig = async roomName => {
   let yoloInfo = await getRoomYolo(roomName);
   client.publish(yoloInfo.subscribe, yoloInfo.request);
 };
@@ -34,7 +34,6 @@ const SentDeviceRequest = async roomName => {
   let deviceArr = await getRoomDevice(roomName);
 
   for (let i = 0; i < deviceArr.length; i++) {
-    console.log(deviceArr[i].subscribe);
     if (deviceArr[i].deviceModule === "Door") {
       client.publish(deviceArr[i].subscribe, deviceArr[i].request.door);
     }
@@ -67,7 +66,7 @@ export {
   devicesTopic,
   SubscribeToYolos,
   SubscribeToDevices,
-  ConfigMQTT,
+  SetupMQTTConfig,
   SentDeviceRequest,
   GetYoloResponse,
   GetDeviceResponse,

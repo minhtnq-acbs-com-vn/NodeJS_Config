@@ -1,17 +1,17 @@
 import cron from "node-cron";
 
-import { getRoomConfig } from "./api.js";
-import { ConfigMQTT } from "./mqtt.js";
+import { getRoomConfig, getSchedule } from "./api.js";
+import { SetupMQTTConfig } from "./mqtt.js";
 
 let configCronList = {};
 let scheduleCronList = {};
 
-const RemoveCronFromList = (type, roomName) => {
-  if (type === "config" && configCronList[roomName] !== undefined)
-    configCronList[roomName].stop();
+const RemoveCronFromList = (type, id) => {
+  if (type === "config" && configCronList[id] !== undefined)
+    configCronList[id].stop();
 
-  if (type === "schedule" && scheduleCronList[roomName] !== undefined)
-    scheduleCronList[roomName].stop();
+  if (type === "schedule" && scheduleCronList[id] !== undefined)
+    scheduleCronList[id].stop();
 };
 
 const GetCronExpress = (type, time) => {
@@ -22,22 +22,37 @@ const GetCronExpress = (type, time) => {
   }
 };
 
-const CreateCronTask = (type, loopTime, roomName) => {
+const CreateCronTask = (type, loopTime, id) => {
   let expression = GetCronExpress(type, loopTime);
-  return cron.schedule(expression, () => ConfigMQTT(roomName), {
-    timezone: "Asia/Ho_Chi_Minh",
-  });
+  if (type === "config") {
+    let roomName = id;
+    return cron.schedule(expression, () => SetupMQTTConfig(roomName), {
+      timezone: "Asia/Ho_Chi_Minh",
+    });
+  }
+  if (type === "schedule") {
+  }
 };
 
-const CreateCron = async (type, roomName) => {
-  RemoveCronFromList(type, roomName);
+const CreateCron = async (type, id) => {
+  RemoveCronFromList(type, id);
   if (type === "config") {
+    let roomName = id;
     let roomConfig = await getRoomConfig(roomName);
     let loopTime = roomConfig.loopTime;
     let cronJob = CreateCronTask(type, loopTime, roomName);
     configCronList[roomName] = cronJob;
   }
   if (type === "schedule") {
+    let docID = id.slice(id.indexOf(":") + 1, id.indexOf("-"));
+    let docOp = id.slice(id.indexOf("-") + 1);
+    if (docOp === "delete") return;
+    let schedule = await getSchedule(docID);
+    console.log(
+      "🚀 ~ file: scheduling.js:51 ~ CreateCron ~ schedule:",
+      schedule
+    );
+    let roomName = schedule.room;
   }
 };
 

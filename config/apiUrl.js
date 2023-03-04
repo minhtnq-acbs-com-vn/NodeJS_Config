@@ -5,7 +5,6 @@ const requestRoomDevice =
   "https://perfect-cow-14.telebit.io/api/v1/room/device/";
 const requestRoomConfig = "https://perfect-cow-14.telebit.io/api/v1/config/";
 const requestGetAllRoom = "https://perfect-cow-14.telebit.io/api/v1/room";
-const requestSchedule = "https://perfect-cow-14.telebit.io/api/v1/schedules/";
 
 export {
   requestConfig,
@@ -14,5 +13,4 @@ export {
   requestRoomDevice,
   requestRoomConfig,
   requestGetAllRoom,
-  requestSchedule,
 };

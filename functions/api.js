@@ -7,7 +7,6 @@ import {
   requestRoomDevice,
   requestRoomConfig,
   requestGetAllRoom,
-  requestSchedule,
 } from "../config/apiUrl.js";
 
 const getAllConfig = async roomName => {
@@ -74,11 +73,6 @@ const getAllRoomDevices = async () => {
   return newArr;
 };
 
-const getSchedule = async id => {
-  let result = await axios.get(requestSchedule + id);
-  return result.data[0];
-};
-
 export {
   getAllConfig,
   getAllYolo,
@@ -86,5 +80,4 @@ export {
   getRoomDevice,
   getRoomConfig,
   getAllRoomDevices,
-  getSchedule,
 };

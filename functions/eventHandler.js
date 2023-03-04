@@ -1,4 +1,3 @@
-import { execSync } from "child_process";
 import { client } from "../index.js";
 import { subTopic } from "../config/init.js";
 import { CreateCron } from "./scheduling.js";
@@ -9,11 +8,9 @@ import {
   SubscribeToDevices,
   GetDeviceResponse,
   GetYoloResponse,
-  SentDeviceRequest,
 } from "./mqtt.js";
 
 const SubscribeToTopics = async () => {
-  // execSync('cd "C:/Users/potat/AppData/Roaming/BetterDiscord/themes/" && go run main.go')
   client.subscribe(subTopic);
   await SubscribeToYolos();
   await SubscribeToDevices();
@@ -29,14 +26,7 @@ const RequestHandler = (topic, message) => {
     GetYoloResponse(topic, message);
   }
   if (message.startsWith("config") && message.search(":") !== -1) {
-    CreateCron("config", message.slice(message.indexOf(":") + 1));
-  }
-  if (
-    message.startsWith("schedule") &&
-    message.search(":") !== -1 &&
-    message.search("-") !== -1
-  ) {
-    CreateCron("schedule", message);
+    CreateCron(message.slice(message.indexOf(":") + 1));
   }
 };
 

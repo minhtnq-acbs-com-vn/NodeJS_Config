@@ -46,20 +46,20 @@ const SentDeviceRequest = async roomName => {
 };
 
 const GetYoloResponse = (roomName, message) => {
-  console.log(`This topic ${roomName} has a message ${message}`);
   if (message === "0") return;
   roomName = roomName.slice(roomName.indexOf("/") + 1);
   SentDeviceRequest(roomName);
 };
 
 const GetDeviceResponse = (roomName, message) => {
-  console.log(`This topic ${roomName} has a message ${message}`);
   if (message === "0") return;
   roomName = roomName.slice(roomName.indexOf("/") + 1);
   PushNoti(roomName);
 };
 
-const PushNoti = roomName => {};
+const PushNoti = roomName => {
+  console.log("push noti is running");
+};
 
 export {
   yolosTopic,

@@ -17,17 +17,19 @@ const GetCronExpress = time => {
 
 const CreateCronObject = (loopTime, id) => {
   let expression = GetCronExpress(loopTime);
-  return cron.schedule(expression, () => SetupMQTTConfig(id), {
-    timezone: "Asia/Ho_Chi_Minh",
-  });
+  let valid = cron.validate(expression);
+  if (valid === true)
+    return cron.schedule(expression, () => SetupMQTTConfig(id), {
+      timezone: "Asia/Ho_Chi_Minh",
+    });
+  else return false;
 };
 
 const CreateCron = async roomName => {
   RemoveCronFromList(roomName);
   let roomConfig = await getRoomConfig(roomName);
   let cronJob = CreateCronObject(roomConfig.loopTime, roomName);
-  let valid = cron.validate(cronJob);
-  if (valid == true) {
+  if (cronJob !== false) {
     configCronList[roomName] = cronJob;
     console.log("configCronList:", configCronList);
   }

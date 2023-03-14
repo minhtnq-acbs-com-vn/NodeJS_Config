@@ -29,10 +29,7 @@ const CreateCron = async roomName => {
   RemoveCronFromList(roomName);
   let roomConfig = await getRoomConfig(roomName);
   let cronJob = CreateCronObject(roomConfig.loopTime, roomName);
-  if (cronJob !== false) {
-    configCronList[roomName] = cronJob;
-    console.log("configCronList:", configCronList);
-  }
+  if (cronJob !== false) configCronList[roomName] = cronJob;
 };
 
 export { CreateCron };

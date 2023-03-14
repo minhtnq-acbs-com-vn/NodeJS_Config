@@ -1,4 +1,5 @@
 import { client } from "../index.js";
+import { checkOfficeHour } from "./helper.js";
 import {
   getAllYolo,
   getAllRoomDevices,
@@ -51,13 +52,24 @@ const GetYoloResponse = (roomName, message) => {
   SentDeviceRequest(roomName);
 };
 
-const GetDeviceResponse = (roomName, message) => {
-  if (message === "0") return;
-  roomName = roomName.slice(roomName.indexOf("/") + 1);
-  PushNoti(roomName);
+const GetDeviceResponse = async (roomName, message) => {
+  let officeHour = checkOfficeHour();
+  let module = roomName.slice(0, roomName.indexOf("/"));
+  let sensor = message.slice(0, message.indexOf(":"));
+  let response = message.slice(message.indexOf(":") + 1);
+
+  if (officeHour === false && module === "Door") {
+    if (sensor === "pir" && response !== "0")
+      await SetupMQTTConfig(roomName.slice(roomName.indexOf("/" + 1)));
+    return;
+  }
+  if (module === "pir") return;
+  if (module === "Temp" && parseInt(response) > 28) return;
+  if (response === "0") return;
+  PushNoti(roomName.slice(roomName.indexOf("/") + 1), sensor);
 };
 
-const PushNoti = roomName => {
+const PushNoti = (roomName, module) => {
   console.log("push noti is running");
 };
 

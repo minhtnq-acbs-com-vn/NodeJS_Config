@@ -63,9 +63,10 @@ const GetDeviceResponse = async (roomName, message) => {
       await SetupMQTTConfig(roomName.slice(roomName.indexOf("/" + 1)));
     return;
   }
+
   if (module === "pir") return;
-  if (module === "Temp" && parseInt(response) > 28) return;
   if (response === "0") return;
+  if (module === "Temp" && parseInt(response) > 28) return;
   PushNoti(roomName.slice(roomName.indexOf("/") + 1), sensor);
 };
 

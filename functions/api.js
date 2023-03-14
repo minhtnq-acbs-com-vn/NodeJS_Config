@@ -55,6 +55,8 @@ const getRoomConfig = async roomName => {
   return result.data;
 };
 
+let doorTopics = [];
+
 const getAllRoomDevices = async () => {
   let result = await axios.get(requestGetAllRoom);
   let roomList = result.data.uniqueRoom;
@@ -68,12 +70,15 @@ const getAllRoomDevices = async () => {
   for (let i = 0; i < filtered.length; i++) {
     for (let j = 0; j < filtered[i].length; j++) {
       newArr.push(filtered[i][j].publish);
+      if (filtered[i][j].deviceModule === "Door")
+        doorTopics.push(filtered[i][j].subscribe);
     }
   }
   return newArr;
 };
 
 export {
+  doorTopics,
   getAllConfig,
   getAllYolo,
   getRoomYolo,

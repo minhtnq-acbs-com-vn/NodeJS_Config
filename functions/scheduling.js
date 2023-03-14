@@ -1,9 +1,40 @@
+import { execSync } from "child_process";
 import cron from "node-cron";
-
-import { getRoomConfig } from "./api.js";
+import { doorTopics, getRoomConfig } from "./api.js";
 import { SetupMQTTConfig } from "./mqtt.js";
 
 let configCronList = {};
+
+let doorCommandID = [];
+let doorCronJob = {};
+const SetupCronPIR = () => {
+  doorCronJob["onPIR"] = cron.schedule("0 8 * * *", () => RemovePirCronTab(), {
+    timezone: "Asia/Ho_Chi_Minh",
+  });
+  doorCronJob["offPIR"] = cron.schedule("0 17 * * *", () => AddPirCronTab(), {
+    timezone: "Asia/Ho_Chi_Minh",
+  });
+};
+
+const AddPirCronTab = () => {
+  for (let i = 0; i < doorTopics.length; i++) {
+    doorCommandID.push(doorTopics[i]);
+    let cronjob = `* * * * * mosquitto_pub -h localhost -t '${doorTopics[i]}' -m 'requestPIRStatus' -u pi -P Kou-chan1153`;
+    RunGoCommand(doorTopics[i], cronjob, "create");
+  }
+};
+
+const RemovePirCronTab = () => {
+  if (doorCommandID.length === 0) return;
+  for (let i = 0; i < doorCommandID.length; i++)
+    RunGoCommand(doorCommandID[i], "", "delete");
+};
+
+const RunGoCommand = (id, cronjob, op) => {
+  execSync(
+    `cd /home/pi/Desktop/go && ./main -id ${id} -toggle "pir" -cronjob "${cronjob}" -op ${op}`
+  );
+};
 
 const RemoveCronFromList = id => {
   if (configCronList[id] !== undefined) configCronList[id].stop();

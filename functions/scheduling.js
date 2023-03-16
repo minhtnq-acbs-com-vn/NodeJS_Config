@@ -15,6 +15,7 @@ const SetupCronPIR = () => {
     timezone: "Asia/Ho_Chi_Minh",
   });
 };
+SetupCronPIR();
 
 const AddPirCronTab = () => {
   for (let i = 0; i < doorTopics.length; i++) {
@@ -32,7 +33,7 @@ const RemovePirCronTab = () => {
 
 const RunGoCommand = (id, cronjob, op) => {
   execSync(
-    `cd /home/pi/Desktop/go && ./main -id ${id} -toggle "pir" -cronjob "${cronjob}" -op ${op}`
+    `cd /home/ubuntu/helpers/go-crontab-manipulate && ./main -id ${id} -toggle "pir" -cronjob "${cronjob}" -op ${op}`
   );
 };
 

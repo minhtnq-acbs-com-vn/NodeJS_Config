@@ -1,5 +1,4 @@
-import { client } from "../index.js";
-import { subTopic } from "../config/init.js";
+import { client } from "../config.js";
 import { CreateCron } from "./scheduling.js";
 import {
   devicesTopic,
@@ -11,7 +10,7 @@ import {
 } from "./mqtt.js";
 
 const SubscribeToTopics = async () => {
-  client.subscribe(subTopic);
+  client.subscribe(process.env.subTopic);
   await SubscribeToYolos();
   await SubscribeToDevices();
   console.log("Wait for messages");

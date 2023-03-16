@@ -1,16 +1,7 @@
 import axios from "axios";
 
-import {
-  requestConfig,
-  requestYolo,
-  requestAllYolo,
-  requestRoomDevice,
-  requestRoomConfig,
-  requestGetAllRoom,
-} from "../config/apiUrl.js";
-
 const getAllConfig = async roomName => {
-  let result = await axios.get(requestConfig + roomName);
+  let result = await axios.get(process.env.requestConfig + roomName);
   let newArr = result.data.map(obj => ({
     room: obj.room,
     loopTime: obj.loopTime,
@@ -19,7 +10,7 @@ const getAllConfig = async roomName => {
 };
 
 const getAllYolo = async () => {
-  let result = await axios.get(requestAllYolo);
+  let result = await axios.get(process.env.requestAllYolo);
   let newArr = [];
   for (let i = 0; i < result.data.length; i++)
     newArr.push(result.data[i].publish);
@@ -27,7 +18,7 @@ const getAllYolo = async () => {
 };
 
 const getRoomYolo = async roomName => {
-  let result = await axios.get(requestYolo + roomName);
+  let result = await axios.get(process.env.requestYolo + roomName);
   let newArr = result.data.map(obj => ({
     subscribe: obj.subscribe,
     publish: obj.publish,
@@ -37,7 +28,7 @@ const getRoomYolo = async roomName => {
 };
 
 const getRoomDevice = async roomName => {
-  let result = await axios.get(requestRoomDevice + roomName);
+  let result = await axios.get(process.env.requestRoomDevice + roomName);
   let newArr = result.data.map(obj => ({
     deviceModule: obj.deviceModule,
     subscribe: obj.topic.subscribe,
@@ -51,14 +42,14 @@ const getRoomDevice = async roomName => {
 };
 
 const getRoomConfig = async roomName => {
-  let result = await axios.get(requestRoomConfig + roomName);
+  let result = await axios.get(process.env.requestRoomConfig + roomName);
   return result.data;
 };
 
 let doorTopics = [];
 
 const getAllRoomDevices = async () => {
-  let result = await axios.get(requestGetAllRoom);
+  let result = await axios.get(process.env.requestGetAllRoom);
   let roomList = result.data.uniqueRoom;
   let filtered = [];
 

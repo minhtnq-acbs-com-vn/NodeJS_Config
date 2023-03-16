@@ -1,4 +1,4 @@
-import { client } from "../index.js";
+import { client } from "../config.js";
 import { checkOfficeHour } from "./helper.js";
 import {
   getAllYolo,

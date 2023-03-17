@@ -47,12 +47,14 @@ const SentDeviceRequest = async roomName => {
 };
 
 const GetYoloResponse = (roomName, message) => {
+  console.log("yolo response: ", message);
   if (message === "0") return;
   roomName = roomName.slice(roomName.indexOf("/") + 1);
   SentDeviceRequest(roomName);
 };
 
 const GetDeviceResponse = async (roomName, message) => {
+  console.log("device response: ", message);
   let officeHour = checkOfficeHour();
   let module = roomName.slice(0, roomName.indexOf("/"));
   let sensor = message.slice(0, message.indexOf(":"));

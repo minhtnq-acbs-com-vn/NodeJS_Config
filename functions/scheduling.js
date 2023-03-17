@@ -62,6 +62,7 @@ const CreateCron = async roomName => {
   let roomConfig = await getRoomConfig(roomName);
   let cronJob = CreateCronObject(roomConfig.loopTime, roomName);
   if (cronJob !== false) configCronList[roomName] = cronJob;
+  console.log(configCronList);
 };
 
 export { CreateCron };

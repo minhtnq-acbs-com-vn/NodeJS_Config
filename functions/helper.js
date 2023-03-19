@@ -1,3 +1,5 @@
+import { execSync } from "child_process";
+
 const getCurrentHour = () => {
   return parseInt(
     new Date().toLocaleTimeString([], {
@@ -18,4 +20,10 @@ const checkOfficeHour = () => {
   }
 };
 
-export { checkOfficeHour };
+const RunGoCommand = (id, toggle, cronjob, op) => {
+  execSync(
+    `cd /home/ubuntu/helpers/go-crontab-manipulate && ./main -id ${id} -toggle ${toggle} -cronjob "${cronjob}" -op ${op}`
+  );
+};
+
+export { checkOfficeHour, RunGoCommand };

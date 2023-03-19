@@ -1,5 +1,5 @@
 import { client } from "../config.js";
-import { CreateCron } from "./scheduling.js";
+import { CreateCron, AddPirCronTab, RemovePirCronTab } from "./scheduling.js";
 import {
   devicesTopic,
   yolosTopic,
@@ -26,6 +26,12 @@ const RequestHandler = (topic, message) => {
   }
   if (message.startsWith("config") && message.search(":") !== -1) {
     CreateCron(message.slice(message.indexOf(":") + 1));
+  }
+  if (message === "AddPirCronTab") {
+    AddPirCronTab();
+  }
+  if (message === "RemovePirCronTab") {
+    RemovePirCronTab();
   }
 };
 

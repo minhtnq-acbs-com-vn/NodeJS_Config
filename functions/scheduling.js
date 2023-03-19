@@ -1,44 +1,38 @@
-import { execSync } from "child_process";
-import cron from "node-cron";
 import { doorTopics, getRoomConfig } from "./api.js";
-import { SetupMQTTConfig } from "./mqtt.js";
+import { RunGoCommand } from "./helper.js";
 
-let configCronList = {};
-
-let doorCommandID = [];
-let doorCronJob = {};
 const SetupCronPIR = () => {
-  doorCronJob["onPIR"] = cron.schedule("0 8 * * *", () => RemovePirCronTab(), {
-    timezone: "Asia/Ho_Chi_Minh",
-  });
-  doorCronJob["offPIR"] = cron.schedule("0 17 * * *", () => AddPirCronTab(), {
-    timezone: "Asia/Ho_Chi_Minh",
-  });
+  RunGoCommand(
+    "initPir",
+    "on",
+    `0 8 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'AddPirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
+    "create"
+  );
+
+  RunGoCommand(
+    "deletePir",
+    "off",
+    `0 17 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'RemovePirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
+    "create"
+  );
 };
 SetupCronPIR();
 
 const AddPirCronTab = () => {
   for (let i = 0; i < doorTopics.length; i++) {
-    doorCommandID.push(doorTopics[i]);
-    let cronjob = `* * * * * mosquitto_pub -h localhost -t '${doorTopics[i]}' -m 'requestPIRStatus' -u pi -P Kou-chan1153`;
-    RunGoCommand(doorTopics[i], cronjob, "create");
+    let cronjob = `* * * * * mosquitto_pub -h localhost -t '${doorTopics[i]}' -m 'requestPIRStatus' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`;
+    RunGoCommand(doorTopics[i], "pir", cronjob, "create");
   }
 };
 
 const RemovePirCronTab = () => {
-  if (doorCommandID.length === 0) return;
-  for (let i = 0; i < doorCommandID.length; i++)
-    RunGoCommand(doorCommandID[i], "", "delete");
-};
-
-const RunGoCommand = (id, cronjob, op) => {
-  execSync(
-    `cd /home/ubuntu/helpers/go-crontab-manipulate && ./main -id ${id} -toggle "pir" -cronjob "${cronjob}" -op ${op}`
-  );
+  for (let i = 0; i < doorTopics.length; i++) {
+    RunGoCommand(doorTopics[i], "pir", "", "delete");
+  }
 };
 
 const RemoveCronFromList = id => {
-  if (configCronList[id] !== undefined) configCronList[id].stop();
+  RunGoCommand(id, "config", "", "delete");
 };
 
 const GetCronExpress = time => {
@@ -47,22 +41,19 @@ const GetCronExpress = time => {
     else return `0 */${time} * * *`;
 };
 
-const CreateCronObject = (loopTime, id) => {
+const CreateCronObject = async (loopTime, id) => {
   let expression = GetCronExpress(loopTime);
   let valid = cron.validate(expression);
-  if (valid === true)
-    return cron.schedule(expression, () => SetupMQTTConfig(id), {
-      timezone: "Asia/Ho_Chi_Minh",
-    });
-  else return false;
+  if (valid === false) return;
+  let yoloInfo = await getRoomYolo(roomName);
+  let cronjob = `${expression} mosquitto_pub -h localhost -t '${yoloInfo.subscribe}' -m '${yoloInfo.request}' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`;
+  RunGoCommand(id, "config", cronjob, "create");
 };
 
 const CreateCron = async roomName => {
   RemoveCronFromList(roomName);
   let roomConfig = await getRoomConfig(roomName);
-  let cronJob = CreateCronObject(roomConfig.loopTime, roomName);
-  if (cronJob !== false) configCronList[roomName] = cronJob;
-  console.log(configCronList);
+  CreateCronObject(roomConfig.loopTime, roomName);
 };
 
-export { CreateCron };
+export { CreateCron, AddPirCronTab, RemovePirCronTab };

@@ -1,11 +1,6 @@
 import { client } from "../config.js";
 import { checkOfficeHour } from "./helper.js";
-import {
-  getAllYolo,
-  getAllRoomDevices,
-  getRoomYolo,
-  getRoomDevice,
-} from "./api.js";
+import { getAllYolo, getAllRoomDevices, getRoomDevice } from "./api.js";
 
 let yolosTopic = [];
 let devicesTopic = [];
@@ -24,11 +19,6 @@ const SubscribeToDevices = async () => {
     client.subscribe(devicesArr[i]);
   }
   devicesTopic = devicesArr;
-};
-
-const SetupMQTTConfig = async roomName => {
-  let yoloInfo = await getRoomYolo(roomName);
-  client.publish(yoloInfo.subscribe, yoloInfo.request);
 };
 
 const SentDeviceRequest = async roomName => {
@@ -81,7 +71,6 @@ export {
   devicesTopic,
   SubscribeToYolos,
   SubscribeToDevices,
-  SetupMQTTConfig,
   SentDeviceRequest,
   GetYoloResponse,
   GetDeviceResponse,

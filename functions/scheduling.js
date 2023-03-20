@@ -38,7 +38,7 @@ const RemoveCronFromList = id => {
 
 const GetCronExpress = time => {
   if (time.search(":") === -1)
-    if (time === "1") return `0 */ * * *`;
+    if (time === "1") return `0 * * * *`;
     else return `0 */${time} * * *`;
 };
 

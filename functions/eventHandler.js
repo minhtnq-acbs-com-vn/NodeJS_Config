@@ -24,8 +24,12 @@ const RequestHandler = (topic, message) => {
   if (yolosTopic.includes(topic) === true) {
     GetYoloResponse(topic, message);
   }
-  if (message.startsWith("config") && message.search(":") !== -1) {
-    CreateCron(message.slice(message.indexOf(":") + 1));
+  if (
+    message.startsWith("config") &&
+    message.search(":") !== -1 &&
+    message.search("@") !== -1
+  ) {
+    CreateCron(message);
   }
   if (message === "AddPirCronTab") {
     AddPirCronTab();

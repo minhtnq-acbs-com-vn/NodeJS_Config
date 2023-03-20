@@ -46,7 +46,7 @@ const CreateCronObject = async (loopTime, id, uid) => {
   let expression = GetCronExpress(loopTime);
   let valid = cron.validate(expression);
   if (valid === false) return;
-  let yoloInfo = await getRoomYolo(roomName, uid);
+  let yoloInfo = await getRoomYolo(id, uid);
   let cronjob = `${expression} mosquitto_pub -h localhost -t '${yoloInfo.subscribe}' -m '${yoloInfo.request}' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`;
   RunGoCommand(id, "config", cronjob, "create");
 };

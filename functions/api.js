@@ -35,11 +35,12 @@ const getAllYolo = async () => {
   return newArr;
 };
 
-const getRoomYolo = async roomName => {
+const getRoomYolo = async (roomName, uid) => {
   let token = await request();
   let result = await axios.get(process.env.requestYolo + roomName, {
     headers: {
       auth: token,
+      userid: uid,
     },
   });
   let newArr = result.data.map(obj => ({
@@ -50,11 +51,12 @@ const getRoomYolo = async roomName => {
   return newArr[0];
 };
 
-const getRoomDevice = async roomName => {
+const getRoomDevice = async (roomName, uid = undefined) => {
   let token = await request();
   let result = await axios.get(process.env.requestRoomDevice + roomName, {
     headers: {
       auth: token,
+      userid: uid,
     },
   });
   let newArr = result.data.map(obj => ({
@@ -69,11 +71,12 @@ const getRoomDevice = async roomName => {
   return newArr;
 };
 
-const getRoomConfig = async roomName => {
+const getRoomConfig = async (roomName, uid) => {
   let token = await request();
   let result = await axios.get(process.env.requestRoomConfig + roomName, {
     headers: {
       auth: token,
+      userid: uid,
     },
   });
   return result.data;

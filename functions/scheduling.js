@@ -1,4 +1,5 @@
-import { doorTopics, getRoomConfig } from "./api.js";
+import cron from "node-cron";
+import { doorTopics, getRoomConfig, getRoomYolo } from "./api.js";
 import { RunGoCommand } from "./helper.js";
 
 const SetupCronPIR = () => {
@@ -41,19 +42,21 @@ const GetCronExpress = time => {
     else return `0 */${time} * * *`;
 };
 
-const CreateCronObject = async (loopTime, id) => {
+const CreateCronObject = async (loopTime, id, uid) => {
   let expression = GetCronExpress(loopTime);
   let valid = cron.validate(expression);
   if (valid === false) return;
-  let yoloInfo = await getRoomYolo(roomName);
+  let yoloInfo = await getRoomYolo(roomName, uid);
   let cronjob = `${expression} mosquitto_pub -h localhost -t '${yoloInfo.subscribe}' -m '${yoloInfo.request}' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`;
   RunGoCommand(id, "config", cronjob, "create");
 };
 
-const CreateCron = async roomName => {
+const CreateCron = async message => {
+  let roomName = message.slice(message.indexOf(":") + 1, message.indexOf("@"));
+  let uid = message.slice(message.indexOf("@") + 1);
   RemoveCronFromList(roomName);
-  let roomConfig = await getRoomConfig(roomName);
-  CreateCronObject(roomConfig.loopTime, roomName);
+  let roomConfig = await getRoomConfig(roomName, uid);
+  CreateCronObject(roomConfig.loopTime, roomName, uid);
 };
 
 export { CreateCron, AddPirCronTab, RemovePirCronTab };

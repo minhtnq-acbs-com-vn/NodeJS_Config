@@ -21,8 +21,8 @@ const SubscribeToDevices = async () => {
   devicesTopic = devicesArr;
 };
 
-const SentDeviceRequest = async roomName => {
-  let deviceArr = await getRoomDevice(roomName);
+const SentDeviceRequest = async (roomName, uid) => {
+  let deviceArr = await getRoomDevice(roomName, uid);
 
   for (let i = 0; i < deviceArr.length; i++) {
     if (deviceArr[i].deviceModule === "Door") {
@@ -36,33 +36,52 @@ const SentDeviceRequest = async roomName => {
   }
 };
 
-const GetYoloResponse = (roomName, message) => {
+const GetYoloResponse = (topic, message) => {
   console.log("yolo response: ", message);
-  if (message === "0") return;
-  roomName = roomName.slice(roomName.indexOf("/") + 1);
-  SentDeviceRequest(roomName);
+  let uid = topic.slice(0, topic.indexOf("/"));
+  let roomName = topic.slice(topic.lastIndexOf("/") + 1);
+  let officeHour = checkOfficeHour();
+  if (officeHour && message === "1") return;
+  if (!officeHour && message === "0") return;
+  SentDeviceRequest(roomName, uid);
 };
 
-const GetDeviceResponse = async (roomName, message) => {
+const GetDeviceResponse = async (topic, message) => {
   console.log("device response: ", message);
   let officeHour = checkOfficeHour();
-  let module = roomName.slice(0, roomName.indexOf("/"));
+  let uid = topic.slice(0, topic.indexOf("/"));
+  let module = topic.slice(topic.indexOf("/") + 1, topic.lastIndexOf("/"));
+  let roomName = topic.slice(topic.lastIndexOf("/") + 1);
   let sensor = message.slice(0, message.indexOf(":"));
   let response = message.slice(message.indexOf(":") + 1);
 
-  if (officeHour === false && module === "Door") {
-    if (sensor === "pir" && response !== "0")
-      await SetupMQTTConfig(roomName.slice(roomName.indexOf("/" + 1)));
-    return;
+  if (
+    !officeHour &&
+    module === "Door" &&
+    sensor === "pir" &&
+    response !== "0"
+  ) {
+    let yoloInfo = await getRoomYolo(roomName, uid);
+    client.publish(yoloInfo.subscribe, yoloInfo.request);
   }
 
-  if (module === "pir") return;
-  if (response === "0") return;
-  if (module === "Temp" && parseInt(response) > 28) return;
-  PushNoti(roomName.slice(roomName.indexOf("/") + 1), sensor);
+  if (officeHour) {
+    if (module === "CameraPack" || module === "Door") {
+      if (sensor === "door" || sensor === "light") {
+        if (response !== "0") {
+          PushNoti(uid, roomName, sensor);
+        }
+      }
+      if (sensor === "temp") {
+        if (parseInt(response) < 29) {
+          PushNoti(uid, roomName, sensor);
+        }
+      }
+    }
+  }
 };
 
-const PushNoti = (roomName, module) => {
+const PushNoti = (uid, roomName, sensor) => {
   console.log("push noti is running");
 };
 

@@ -1,18 +1,9 @@
 import axios from "axios";
 
-const request = async () => {
-  let response = await axios.post(process.env.requestToken, {
-    email: process.env.email,
-    password: process.env.password,
-  });
-  return response.headers.auth;
-};
-
 const getAllConfig = async roomName => {
-  let token = await request();
   let result = await axios.get(process.env.requestConfig + roomName, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
     },
   });
   let newArr = result.data.map(obj => ({
@@ -23,10 +14,9 @@ const getAllConfig = async roomName => {
 };
 
 const getAllYolo = async () => {
-  let token = await request();
   let result = await axios.get(process.env.requestAllYolo, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
     },
   });
   let newArr = [];
@@ -36,10 +26,9 @@ const getAllYolo = async () => {
 };
 
 const getRoomYolo = async (roomName, uid) => {
-  let token = await request();
   let result = await axios.get(process.env.requestYolo + roomName, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
       userid: uid,
     },
   });
@@ -52,10 +41,9 @@ const getRoomYolo = async (roomName, uid) => {
 };
 
 const getRoomDevice = async (roomName, uid = undefined) => {
-  let token = await request();
   let result = await axios.get(process.env.requestRoomDevice + roomName, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
       userid: uid,
     },
   });
@@ -72,10 +60,9 @@ const getRoomDevice = async (roomName, uid = undefined) => {
 };
 
 const getRoomConfig = async (roomName, uid) => {
-  let token = await request();
   let result = await axios.get(process.env.requestRoomConfig + roomName, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
       userid: uid,
     },
   });
@@ -85,10 +72,9 @@ const getRoomConfig = async (roomName, uid) => {
 let doorTopics = [];
 
 const getAllRoomDevices = async () => {
-  let token = await request();
   let result = await axios.get(process.env.requestGetAllRoom, {
     headers: {
-      auth: token,
+      system: process.env.systemKey,
     },
   });
   let roomList = result.data.uniqueRoom;

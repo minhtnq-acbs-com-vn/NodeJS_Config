@@ -17,7 +17,6 @@ const SetupCronPIR = () => {
     "create"
   );
 };
-SetupCronPIR();
 
 const AddPirCronTab = () => {
   for (let i = 0; i < doorTopics.length; i++) {
@@ -59,4 +58,4 @@ const CreateCron = async message => {
   CreateCronObject(roomConfig.loopTime, roomName, uid);
 };
 
-export { CreateCron, AddPirCronTab, RemovePirCronTab };
+export { SetupCronPIR, CreateCron, AddPirCronTab, RemovePirCronTab };

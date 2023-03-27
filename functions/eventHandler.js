@@ -1,5 +1,5 @@
 import { client } from "../config.js";
-import { CreateCron, AddPirCronTab, RemovePirCronTab } from "./scheduling.js";
+import { SetupCronPIR, CreateCron, AddPirCronTab, RemovePirCronTab } from "./scheduling.js";
 import {
   devicesTopic,
   yolosTopic,
@@ -10,6 +10,7 @@ import {
 } from "./mqtt.js";
 
 const SubscribeToTopics = async () => {
+  SetupCronPIR();
   client.subscribe(process.env.subTopic);
   await SubscribeToYolos();
   await SubscribeToDevices();

@@ -1,6 +1,11 @@
 import { client } from "../config.js";
 import { checkOfficeHour } from "./helper.js";
-import { getAllYolo, getAllRoomDevices, getRoomDevice } from "./api.js";
+import {
+  getAllYolo,
+  getAllRoomDevices,
+  getRoomDevice,
+  triggerPushNoti,
+} from "./api.js";
 
 let yolosTopic = [];
 let devicesTopic = [];
@@ -81,8 +86,19 @@ const GetDeviceResponse = async (topic, message) => {
   }
 };
 
-const PushNoti = (uid, roomName, sensor) => {
-  console.log("push noti is running");
+const PushNoti = async (uid, roomName, sensor) => {
+  let data = "";
+  if (sensor === "door") {
+    data = `In room ${roomName}: ${sensor} is not locked`;
+  }
+  if (sensor === "light") {
+    data = `In room ${roomName}: ${sensor} is not turnoff`;
+  }
+  if (sensor === "temp") {
+    data = `In room ${roomName}: AC is not turnoff`;
+  }
+  result = await triggerPushNoti(uid, data);
+  if (result !== "true") console.log("failed to send noti");
 };
 
 export {

@@ -95,6 +95,22 @@ const getAllRoomDevices = async () => {
   return newArr;
 };
 
+const triggerPushNoti = async (uid, data) => {
+  let result = await axios.post(
+    process.env.requestPushNoti,
+    {
+      info: data,
+      topic: uid,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return result.data.success;
+};
+
 export {
   doorTopics,
   getAllConfig,
@@ -103,4 +119,5 @@ export {
   getRoomDevice,
   getRoomConfig,
   getAllRoomDevices,
+  triggerPushNoti,
 };

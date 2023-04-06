@@ -60,6 +60,8 @@ const GetDeviceResponse = async (topic, message) => {
   let sensor = message.slice(0, message.indexOf(":"));
   let response = message.slice(message.indexOf(":") + 1);
 
+  console.log("office hour:", officeHour);
+
   if (
     !officeHour &&
     module === "Door" &&
@@ -74,12 +76,12 @@ const GetDeviceResponse = async (topic, message) => {
     if (module === "CameraPack" || module === "Door") {
       if (sensor === "door" || sensor === "light") {
         if (response !== "0") {
-          PushNoti(uid, roomName, sensor);
+          await PushNoti(uid, roomName, sensor);
         }
       }
       if (sensor === "temp") {
         if (parseInt(response) < 29) {
-          PushNoti(uid, roomName, sensor);
+          await PushNoti(uid, roomName, sensor);
         }
       }
     }
@@ -97,6 +99,7 @@ const PushNoti = async (uid, roomName, sensor) => {
   if (sensor === "temp") {
     data = `In room ${roomName}: AC is not turnoff`;
   }
+  console.log("push noti data", uid, data);
   result = await triggerPushNoti(uid, data);
   if (result !== "true") console.log("failed to send noti");
 };

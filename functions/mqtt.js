@@ -101,7 +101,7 @@ const PushNoti = async (uid, roomName, sensor) => {
   }
   console.log("push noti data", uid, data);
   let result = await triggerPushNoti(uid, data);
-  if (result !== "true") console.log("failed to send noti");
+  if (!result) console.log("failed to send noti");
 };
 
 export {

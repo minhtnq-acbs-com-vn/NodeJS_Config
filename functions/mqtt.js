@@ -4,6 +4,7 @@ import {
   getAllYolo,
   getAllRoomDevices,
   getRoomDevice,
+  getRoomYolo,
   triggerPushNoti,
 } from "./api.js";
 
@@ -47,7 +48,6 @@ const GetYoloResponse = (topic, message) => {
   let roomName = topic.slice(topic.lastIndexOf("/") + 1);
   let officeHour = checkOfficeHour();
   if (officeHour && message === "1") return;
-  if (!officeHour && message === "0") return;
   SentDeviceRequest(roomName, uid);
 };
 
@@ -62,28 +62,24 @@ const GetDeviceResponse = async (topic, message) => {
 
   console.log("office hour:", officeHour);
 
-  if (
-    !officeHour &&
-    module === "Door" &&
-    sensor === "pir" &&
-    response !== "0"
-  ) {
-    let yoloInfo = await getRoomYolo(roomName, uid);
-    client.publish(yoloInfo.subscribe, yoloInfo.request);
+  if (!officeHour) {
+    if (module === "Door" && sensor === "pir" && response !== "0") {
+      let yoloInfo = await getRoomYolo(roomName, uid);
+      client.publish(yoloInfo.subscribe, yoloInfo.request);
+      await PushNoti(uid, roomName, sensor);
+    }
   }
 
-  if (officeHour) {
-    if (module === "CameraPack" || module === "Door") {
-      if (sensor === "door" || sensor === "light") {
-        if (response !== "0") {
-          await PushNoti(uid, roomName, sensor);
-        }
-      }
-      if (sensor === "temp") {
-        if (parseInt(response) < 29) {
-          await PushNoti(uid, roomName, sensor);
-        }
-      }
+  if (module === "Door" && sensor === "door" && response !== "0") {
+    await PushNoti(uid, roomName, sensor);
+  }
+
+  if (module === "CameraPack") {
+    if (sensor === "temp" && parseInt(response) < 29) {
+      await PushNoti(uid, roomName, sensor);
+    }
+    if (sensor === "light" && response !== "0") {
+      await PushNoti(uid, roomName, sensor);
     }
   }
 };
@@ -98,6 +94,9 @@ const PushNoti = async (uid, roomName, sensor) => {
   }
   if (sensor === "temp") {
     data = `In room ${roomName}: AC is not turnoff`;
+  }
+  if (sensor === "pir") {
+    data = `In room ${roomName}: Detect movement outside of working hours`;
   }
   console.log("push noti data", uid, data);
   let result = await triggerPushNoti(uid, data);

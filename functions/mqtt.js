@@ -29,6 +29,7 @@ const SubscribeToDevices = async () => {
 
 const SentDeviceRequest = async (roomName, uid) => {
   let deviceArr = await getRoomDevice(roomName, uid);
+  let officeHour = checkOfficeHour();
 
   for (let i = 0; i < deviceArr.length; i++) {
     if (deviceArr[i].deviceModule === "Door") {
@@ -38,6 +39,13 @@ const SentDeviceRequest = async (roomName, uid) => {
     if (deviceArr[i].deviceModule === "CameraPack") {
       client.publish(deviceArr[i].subscribe, deviceArr[i].request.lightState);
       client.publish(deviceArr[i].subscribe, deviceArr[i].request.temp);
+    }
+
+    if (!officeHour) {
+      if (deviceArr[i].deviceModule === "AC") {
+        client.publish(deviceArr[i].subscribe, deviceArr[i].request.acOff);
+        client.publish(deviceArr[i].subscribe, deviceArr[i].request.lightOff);
+      }
     }
   }
 };
@@ -68,17 +76,18 @@ const GetDeviceResponse = async (topic, message) => {
       client.publish(yoloInfo.subscribe, yoloInfo.request);
       await PushNoti(uid, roomName, sensor);
     }
-  }
 
-  if (module === "Door" && sensor === "door" && response !== "0") {
-    await PushNoti(uid, roomName, sensor);
-  }
-
-  if (module === "CameraPack") {
-    if (sensor === "temp" && parseInt(response) < 29) {
+    if (module === "Door" && sensor === "door" && response !== "0") {
       await PushNoti(uid, roomName, sensor);
     }
-    if (sensor === "light" && response !== "0") {
+  }
+
+  if (officeHour) {
+    if (module === "Door" && sensor === "door" && response !== "0") {
+      await PushNoti(uid, roomName, sensor);
+    }
+
+    if (module === "CameraPack" && sensor === "light" && response !== "0") {
       await PushNoti(uid, roomName, sensor);
     }
   }
@@ -91,9 +100,6 @@ const PushNoti = async (uid, roomName, sensor) => {
   }
   if (sensor === "light") {
     data = `In room ${roomName}: ${sensor} is not turnoff`;
-  }
-  if (sensor === "temp") {
-    data = `In room ${roomName}: AC is not turnoff`;
   }
   if (sensor === "pir") {
     data = `In room ${roomName}: Detect movement outside of working hours`;

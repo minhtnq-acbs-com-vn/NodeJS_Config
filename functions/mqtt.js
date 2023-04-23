@@ -55,8 +55,9 @@ const GetYoloResponse = (topic, message) => {
   let uid = topic.slice(0, topic.indexOf("/"));
   let roomName = topic.slice(topic.lastIndexOf("/") + 1);
   let officeHour = checkOfficeHour();
-  if (officeHour && message === "1") return;
-  SentDeviceRequest(roomName, uid);
+  if (officeHour && message === "0") {
+    SentDeviceRequest(roomName, uid);
+  }
 };
 
 const GetDeviceResponse = async (topic, message) => {

@@ -6,14 +6,14 @@ const SetupCronPIR = () => {
   RunGoCommand(
     "initPir",
     "on",
-    `0 8 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'AddPirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
+    `0 8 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'RemovePirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
     "create"
   );
 
   RunGoCommand(
     "deletePir",
     "off",
-    `0 17 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'RemovePirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
+    `0 17 * * * mosquitto_pub -h localhost -t '${process.env.subTopic}' -m 'AddPirCronTab' -u '${process.env.brokerUname}' -P '${process.env.brokerPassword}'`,
     "create"
   );
 };

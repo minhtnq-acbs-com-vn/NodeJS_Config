@@ -85,11 +85,11 @@ const GetDeviceResponse = async (topic, message) => {
 
   if (officeHour) {
     if (module === "Door" && sensor === "door" && response !== "1") {
-      await PushNoti(uid, response, sensor);
+      await PushNoti(uid, roomName, sensor);
     }
 
     if (module === "CameraPack" && sensor === "light" && response !== "0") {
-      await PushNoti(uid, response, sensor);
+      await PushNoti(uid, roomName, sensor);
     }
   }
 };
@@ -100,7 +100,7 @@ const PushNoti = async (uid, roomName, sensor) => {
     data = `In room ${roomName}: ${sensor} is not locked`;
   }
   if (sensor === "light") {
-    data = `In room ${roomName}: ${sensor} is not turnoff`;
+    data = `In room ${roomName}: ${sensor} is not turn off`;
   }
   if (sensor === "pir") {
     data = `In room ${roomName}: Detect movement outside of working hours`;

@@ -78,18 +78,18 @@ const GetDeviceResponse = async (topic, message) => {
       await PushNoti(uid, roomName, sensor);
     }
 
-    if (module === "Door" && sensor === "door" && response !== "0") {
+    if (module === "Door" && sensor === "door" && response !== "1") {
       await PushNoti(uid, roomName, sensor);
     }
   }
 
   if (officeHour) {
-    if (module === "Door" && sensor === "door" && response !== "0") {
-      await PushNoti(uid, roomName, sensor);
+    if (module === "Door" && sensor === "door" && response !== "1") {
+      await PushNoti(uid, response, sensor);
     }
 
     if (module === "CameraPack" && sensor === "light" && response !== "0") {
-      await PushNoti(uid, roomName, sensor);
+      await PushNoti(uid, response, sensor);
     }
   }
 };
